@@ -38,7 +38,7 @@ The first two buttons addresses are shared with the Apple keys, so it's best not
 	PB2 			= $C063	; game Pushbutton 2 (read) <- Our victim
 
 	PB3 (GS only)	= $C060	; game Pushbutton 3 (read) 
-                          $C060 bit 7 = data from cassette on Apple II, II+, IIe
+	$C060 bit 7 = data from cassette on Apple II, II+, IIe
 
 Button 3 and the cassette share the same memory address $C060. So, we could toggle pin 9 on the game port (PB3) to load data directly into the memory address for the built-in cassette routines. But that pin is only on the GS. Poo. And the GS, having no cassette input, has no cassette routine in ROM. Double poo.
 
@@ -393,7 +393,7 @@ Here is a buffered I/O routine for minimally interactive data transmission betwe
     081D-   A5 08       LDA   $08	; load Accumulator with new buffer length
     0820-   D0 EC       BNE   $080E	; if there's more to come, loop (betweenbytes)
     0822-   20 8E FD    JSR   $FD8E	; last byte. print CF/LF
-    0825-   60		RTS		; return
+    0825-   60			RTS			; return
 
 
 GETLINE
@@ -415,7 +415,7 @@ GETLINE
     0846-   A5 06       LDA   $06	; load buffer pointer into Accumulator
     0848-   C5 07       CMP   $07	; compare with message length
     084A-   D0 EE       BNE   $083A	; if not at end of message, loop to (keybuffer)
-    084C-   60          RTS		; return
+    084C-   60          RTS			; return
 
 QUERY BUFFER LENGTH
 returns buffer length in $08
@@ -427,7 +427,7 @@ returns buffer length in $08
     0858-   20 4A 03    JSR   $034A	;	CTS - ready for response byte with buffer length
     085B-   F0 F0       BEQ   $084D	;	if there's nothing in the buffer, loop until there is
     085D-   85 08       STA   $08	;	put the byte in $08
-    085F-   60          RTS		;	return  
+    085F-   60			RTS			;	return  
 
 
 
@@ -444,11 +444,7 @@ EF: ReadByte, SendByte
 So, What Can It Do?
 ===
 
-<<<<<<< Updated upstream
 With a general purpose gateway to I2C, SPI and UART devices (among others), GP2IO lets the Apple II access a variety of different inputs and outputs, from sensors and alternate controllers to external data displays.
-=======
-With a general purpose gateway to I2C, SPI and UART devices (among others), GP2IO lets the Apple II access a variety of different inputs and outputs, from sensors and alternate controllers to external data displays.
->>>>>>> Stashed changes
 
 Some use case ideas include:
  -	light indicator for disk activity, RWTS function
@@ -511,11 +507,3 @@ Judges:
  -	Charles Mangin
  -	Mark Pilgrim
  -	Bill Martens
-	
-		
-
-
-<<<<<<< Updated upstream
-
-=======
->>>>>>> Stashed changes
