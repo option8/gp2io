@@ -301,8 +301,7 @@ The plan, again, is to mimic data coming in on the cassette port, but with the p
 	From Apple II Circuit Description by Winston Gaylor
 	©1983 by Howard and Sams & Co, Inc.
 
-Here's the source for those calls, again via 
-			https://github.com/cmosher01/Apple-II-Source/blob/master/src/system/monitor/common/cassette.m4
+Here's the source for those calls, again via https://github.com/cmosher01/Apple-II-Source/blob/master/src/system/monitor/common/cassette.m4
 
 	TAPEOUT  =     $C020
 	TAPEIN   =     $C060
@@ -338,6 +337,7 @@ $C05C = set annunciator 2 = 0
 Entry point at $34A. Received byte is returned in Accumulator 
 
 READCOMBINED
+
     034A-   A2 09       LDX   #$09	; reading 8 bits requires 9 transitions.
     034C-   A9 00       LDA   #$00	; clear the accumulator
     034E-   85 EF       STA   $EF	; $EF is staging for received byte, set 0
@@ -363,6 +363,7 @@ READCOMBINED
 And a demo: this reads one byte from the AVR output buffer to the screen. It gets one byte at a time, triggered by a keypress. The AVR will need to be ready to send one byte at a time when it sees ANN2 go HIGH ("SEND BUFFER CONTENT" mode, set by sending $80 as the function switch first).
 
 GETBYTEONKEY
+
     0800-   20 1B FD    JSR   $FD1B	; wait for keypress
     0803-   20 4A 03    JSR   $034A	; READBYTE
     0806-   20 DA FD    JSR   $FDDA	; print hex to screen
@@ -378,9 +379,7 @@ The GP2IO then sends the requested number of bytes from its internal output buff
 
 Here is a buffered I/O routine for minimally interactive data transmission between the Apple II and a serial device connected to the GP2IO.
 
-    0800-   20 4D 08    JSR   $084D	; start by querying the buffer length - is there anything waiting?
-								; returns with buffer length in $08
-
+    0800-   20 4D 08    JSR   $084D	; start by querying the buffer length - is there anything waiting? returns with buffer length in $08
     0804-   A9 80       LDA   #$80	; load control byte $80 "send buffer bytes"
     0806-   20 03 03    JSR   $0303	; send control byte
     0809-   A5 08       LDA   $08	; load buffer length (or however much buffer you want sent)
@@ -394,11 +393,13 @@ Here is a buffered I/O routine for minimally interactive data transmission betwe
     081D-   A5 08       LDA   $08	; load Accumulator with new buffer length
     0820-   D0 EC       BNE   $080E	; if there's more to come, loop (betweenbytes)
     0822-   20 8E FD    JSR   $FD8E	; last byte. print CF/LF
-    0825-   60          RTS			; return
+    0825-   60		RTS		; return
+
 
 GETLINE
+
     0826-   20 6A FD    JSR   $FD6A	; get line of input
-    0829-   8A          TXA			; get input length into Accumulator
+    0829-   8A          TXA		; get input length into Accumulator
     082A-   85 07       STA   $07	; put input length into $07
     082C-   A9 00       LDA   #$00	; load zero into Accumulator
     082E-   85 06       STA   $06	; put zero into $06, keyboard buffer pointer
@@ -414,7 +415,7 @@ GETLINE
     0846-   A5 06       LDA   $06	; load buffer pointer into Accumulator
     0848-   C5 07       CMP   $07	; compare with message length
     084A-   D0 EE       BNE   $083A	; if not at end of message, loop to (keybuffer)
-    084C-   60          RTS			; return
+    084C-   60          RTS		; return
 
 QUERY BUFFER LENGTH
 returns buffer length in $08
@@ -426,7 +427,7 @@ returns buffer length in $08
     0858-   20 4A 03    JSR   $034A	;	CTS - ready for response byte with buffer length
     085B-   F0 F0       BEQ   $084D	;	if there's nothing in the buffer, loop until there is
     085D-   85 08       STA   $08	;	put the byte in $08
-    085F-   60          RTS			;	return  
+    085F-   60          RTS		;	return  
 
 
 
