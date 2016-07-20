@@ -444,7 +444,11 @@ EF: ReadByte, SendByte
 So, What Can It Do?
 ===
 
+<<<<<<< Updated upstream
 With a general purpose gateway to I2C, SPI and UART devices (among others), GP2IO lets the Apple II access a variety of different inputs and outputs, from sensors and alternate controllers to external data displays.
+=======
+With a general purpose gateway to I2C, SPI and UART devices (among others), GP2IO lets the Apple II access a variety of different inputs and outputs, from sensors and alternate controllers to external data displays.
+>>>>>>> Stashed changes
 
 Some use case ideas include:
  -	light indicator for disk activity, RWTS function
@@ -511,4 +515,7 @@ Judges:
 		
 
 
+<<<<<<< Updated upstream
 
+=======
+>>>>>>> Stashed changes
