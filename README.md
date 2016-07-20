@@ -38,15 +38,13 @@ The first two buttons addresses are shared with the Apple keys, so it's best not
 	PB2 			= $C063	; game Pushbutton 2 (read) <- Our victim
 
 	PB3 (GS only)	= $C060	; game Pushbutton 3 (read) 
-					  $C060 bit 7 = data from cassette on Apple II, II+, IIe
+                          $C060 bit 7 = data from cassette on Apple II, II+, IIe
 
 Button 3 and the cassette share the same memory address $C060. So, we could toggle pin 9 on the game port (PB3) to load data directly into the memory address for the built-in cassette routines. But that pin is only on the GS. Poo. And the GS, having no cassette input, has no cassette routine in ROM. Double poo.
 
 Luckily, there are already examples of reading in data on those pins. 
 
 I dug into [Michael Mahon's NadaNet](http://michaeljmahon.com/NadaNetPaper.html) implementation for inspiration, and found proof of speedy and reliable communication on the game port. This was encouraging.
-
-	
 
 But, rather than require developers to implement NadaNet network packet reads just to get a few bytes into and out of an AVR, we can continue to take inspiration from the cassette routines. Using those as a starting point, I look for a transition from LOW to HIGH in pushbutton 1, then count the loops until the transition from HIGH to LOW. If it's a short time, the bit is zero, if it's longer, a one.
 
@@ -123,15 +121,15 @@ entry point $0303, or $0300 for sending single bit
 uses $EF for storing outgoing byte
 
     0300-   A0 01       LDY   #$01	; load 1, for a 1 bit send - OR -   
-    0302-   2C  		BIT  		;    
-    0303-	A0 08		LDY   #$08	; load 8 for a full byte, loop counter   
+    0302-   2C          BIT  		;    
+    0303-   A0 08       LDY   #$08	; load 8 for a full byte, loop counter   
     0305-   85 EF       STA   $EF	; put byte in zero page for safe keeping   
     0307-   8D 59 C0    STA   $C059	; annunciator 0 high, RTS   
     030A-   26 EF       ROL   $EF	; rotate byte left, high/MSB out to carry (sendbit)   
     030C-   90 03       BCC   $0311	; "branch on carry clear" - if carry/bit = 0, goto #311 (short loop)   
     030E-   A2 14       LDX   #$14	; if carry/bit = 1, load X with 20 (long loop) - OR -   
-    0310-   2C 			BIT   
-    0311-	A2 0A       LDX   #$0A	; if carry/bit = 0, load X with 10 (short loop)   
+    0310-   2C          BIT   
+    0311-   A2 0A       LDX   #$0A	; if carry/bit = 0, load X with 10 (short loop)   
     0313-   8D 5B C0    STA   $C05B	; set annunciator 1 HIGH   
     0316-   CA          DEX			; decrement, countdown to setting ANN1 low (countdown)   
     0317-   D0 FD       BNE   $0316	; if X > 0, keep counting (countdown)   
@@ -151,52 +149,37 @@ uses $EF for storing outgoing byte
 
 On the GP2IO side, the AVR has two interrupts set on ANN0 and ANN1: as the RTS pin goes HIGH (rising), and on changes to the data pin. If the data pin changes state in less than 70 microseconds (.07 milliseconds) the bit is read as zero. Longer than 70 microseconds, a one.
 
+~~~
      attachInterrupt(0, APPLERTS, RISING); // ANNUNCIATOR 0, Apple sending byte
      attachInterrupt(1, RECEIVINGBITS, CHANGE); // ANNUNCIATOR 1, Apple sending bits
-
    void APPLERTS() {
      // signal to start receiving bits from Apple II
      bitCount = 0;
      changeCount = 0;
      returnByte = B00000000;
    }
-
    void RECEIVINGBITS()
    {
      // ignore short "reset" transitions
      currentMicros = micros();
-
      if (changeCount % 2 == 1) {
-
        if ((currentMicros - lastMicros) > 70) {
-
          receivedBit = 1;
-
        } else {
-
          receivedBit = 0;
        }
-
        byteArray[7 - bitCount] = receivedBit;
-
        bitCount++;
-
-
      }
      changeCount++;
-
      if (bitCount == 8) { // got a BYTE
        receivedByte = arrayToByte(byteArray, 8);
        PROCESSBYTE( byte(receivedByte) );
        TIMEOUTCLOCK = millis();
      }
-
      lastMicros = currentMicros;
-
    }
-
-
-
+~~~
 
 
 ===
@@ -222,15 +205,23 @@ Processing Bytes on the GP2IO
 
 The AVR starts in a null "standby" state, waiting for a "control" byte from the Apple II to set its function. Subsequent bytes after the function is set are the "message". The value of the first byte from the Apple determines the function according to this table:
 
-$01		Sets the RGB LED on the GP2IO to the color value of the next three bytes, in order Red, Green and Blue. Requires 3 byte message
-$02		Sets the RGB LED to white, intensity based on the 1 byte message that follows (0-255).
-$04		Write the following message to an internal buffer, for retrieval later.	First byte is message length (0-255 bytes follow)
-$08		Write the following message to UART serial (buffered). First byte is message length (0-255 bytes follow)
-$10		Write the following 8 bytes to I2C bus. For the demo, this is connected to either an 8x8 LED matrix or a 4 character 7-segment display. Requires 8 byte message. 
-$20		SPI (not yet implemented)
-$40		Query the buffer. Triggers the AVR to respond with one byte, containing the length of the current buffer. 
-$80		Send the buffer. Triggers the AVR to respond with the first N bytes of the buffer, where N is the byte following the $80 trigger.
-$00		Debug mode. At the moment, simply echoes the bytes received from the Apple side into the serial buffer, and prints them to USB serial out. Also sends one byte from the GP2IO buffer to the Apple whenever the APPLECTS signal (Annunciator 2) goes high.
+        $01		Sets the RGB LED on the GP2IO to the color value of the next three bytes, in order Red, Green and Blue. Requires 3 byte message
+        
+        $02		Sets the RGB LED to white, intensity based on the 1 byte message that follows (0-255).
+        
+        $04		Write the following message to an internal buffer, for retrieval later.	First byte is message length (0-255 bytes follow)
+        
+        $08		Write the following message to UART serial (buffered). First byte is message length (0-255 bytes follow)
+        
+        $10		Write the following 8 bytes to I2C bus. For the demo, this is connected to either an 8x8 LED matrix or a 4 character 7-segment display. Requires 8 byte message. 
+        
+        $20		SPI (not yet implemented)
+        
+        $40		Query the buffer. Triggers the AVR to respond with one byte, containing the length of the current buffer. 
+        
+        $80		Send the buffer. Triggers the AVR to respond with the first N bytes of the buffer, where N is the byte following the $80 trigger.
+        
+        $00		Debug mode. At the moment, simply echoes the bytes received from the Apple side into the serial buffer, and prints them to USB serial out. Also sends one byte from the GP2IO buffer to the Apple whenever the APPLECTS signal (Annunciator 2) goes high.
 	
 
 Each function, as outlined, expects a certain number of bytes per message. For example, to set an RGB LED requires three bytes - one each for Red, Green, and Blue values, plus the first $01 byte to set the function, for a total of four. 
@@ -259,6 +250,7 @@ EXAMPLE: RGB LED Pulse white
 
 SLIGHTLY MORE COMPLEX EXAMPLE: RGB LED pulsing 
 
+
 SETRGB:
 	one-shot, sets the LED with red value in $06, green at $07, blue at $08
 
@@ -271,6 +263,7 @@ SETRGB:
     080F-   A5 08       LDA   $08	; read blue value
     0811-   20 03 03    JSR   $0303	; SENDBYTE
     0814-   60          RTS			; return.
+
 
 CYCLERGB
 
