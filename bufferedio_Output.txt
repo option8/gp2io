@@ -1,0 +1,75 @@
+------+------------------------+-------------+----+---------+------+-----------------------+-------------------------------------------------------------------
+ Line | # File            Line | Line Type   | MX |  Reloc  | Size | Address   Object Code |  Source Code                                                      
+------+------------------------+-------------+----+---------+------+-----------------------+-------------------------------------------------------------------
+    1 |  1 bufferedio.s      1 | Directive   | 11 |         |    0 | 00/8000               |               ORG   $800           
+    2 |  1 bufferedio.s      2 | Equivalence | 11 |         |    0 | 00/0800               | BUFFERLENGTH  EQU   $08            
+    3 |  1 bufferedio.s      3 | Equivalence | 11 |         |    0 | 00/0800               | INPUTLENGTH   EQU   $07            
+    4 |  1 bufferedio.s      4 | Equivalence | 11 |         |    0 | 00/0800               | INPUTPTR      EQU   $06            
+    5 |  1 bufferedio.s      5 | Equivalence | 11 |         |    0 | 00/0800               | SENDBYTE      EQU   $0300          
+    6 |  1 bufferedio.s      6 | Equivalence | 11 |         |    0 | 00/0800               | READBYTE      EQU   $034A          
+    7 |  1 bufferedio.s      7 | Equivalence | 11 |         |    0 | 00/0800               | WAIT          EQU   $FCA8          
+    8 |  1 bufferedio.s      8 | Equivalence | 11 |         |    0 | 00/0800               | PRINTCR       EQU   $FD8E          
+    9 |  1 bufferedio.s      9 | Equivalence | 11 |         |    0 | 00/0800               | PRINTBYTE     EQU   $FDED          
+   10 |  1 bufferedio.s     10 | Equivalence | 11 |         |    0 | 00/0800               | ANN2HI        EQU   $C05D          
+   11 |  1 bufferedio.s     11 | Equivalence | 11 |         |    0 | 00/0800               | ANN2LO        EQU   $C05C          
+   12 |  1 bufferedio.s     12 | Equivalence | 11 |         |    0 | 00/0800               | KEYBUFFER     EQU   $0200          
+   13 |  1 bufferedio.s     13 | Empty       | 11 |         |    0 | 00/0800               |                                    
+   14 |  1 bufferedio.s     14 | Code        | 11 |         |    3 | 00/0800 : 20 4B 08    | BUFFERIO      JSR   QUERYBUFFER    ; start by querying the buffer length - is there anything waiting? returns with buffer length in $08
+   15 |  1 bufferedio.s     15 | Code        | 11 |         |    2 | 00/0803 : A9 80       |               LDA   #$80           ; load control byte $80 "send buffer bytes"
+   16 |  1 bufferedio.s     16 | Code        | 11 |         |    3 | 00/0805 : 20 00 03    |               JSR   {$0300}        ; send control byte
+   17 |  1 bufferedio.s     17 | Code        | 11 |         |    2 | 00/0808 : A5 08       |               LDA   {$08}          ; load buffer length (or however much buffer you want sent)
+   18 |  1 bufferedio.s     18 | Code        | 11 |         |    3 | 00/080A : 20 00 03    |               JSR   {$0300}        ; send message length byte
+   19 |  1 bufferedio.s     19 | Code        | 11 |         |    2 | 00/080D : A9 28       | BETWEENBYTES  LDA   #$28           ; wait a moment (betweenbytes)
+   20 |  1 bufferedio.s     20 | Code        | 11 |         |    3 | 00/080F : 20 A8 FC    |               JSR   {$FCA8}        ; wait
+   21 |  1 bufferedio.s     21 | Code        | 11 |         |    3 | 00/0812 : 20 4A 03    |               JSR   {$034A}        ; CTS - send byte
+   22 |  1 bufferedio.s     22 | Code        | 11 |         |    2 | 00/0815 : 09 80       |               ORA   #$80           ; clear byte 7 (for ASCII)
+   23 |  1 bufferedio.s     23 | Code        | 11 |         |    3 | 00/0817 : 20 ED FD    |               JSR   {$FDED}        ; display byte on screen
+   24 |  1 bufferedio.s     24 | Code        | 11 |         |    2 | 00/081A : C6 08       |               DEC   {$08}          ; count down bytes (countdownbuffer)
+   25 |  1 bufferedio.s     25 | Code        | 11 |         |    2 | 00/081C : A5 08       |               LDA   {$08}          ; load Accumulator with new buffer length
+   26 |  1 bufferedio.s     26 | Code        | 11 |         |    2 | 00/081E : D0 ED       |               BNE   BETWEENBYTES   ; if there's more to come, loop (betweenbytes)
+   27 |  1 bufferedio.s     27 | Code        | 11 |         |    3 | 00/0820 : 20 8E FD    |               JSR   {$FD8E}        ; last byte. print CF/LF
+   28 |  1 bufferedio.s     28 | Code        | 11 |         |    1 | 00/0823 : 60          |               RTS                  ; return
+   29 |  1 bufferedio.s     29 | Empty       | 11 |         |    0 | 00/0824               |                                    
+   30 |  1 bufferedio.s     30 | Code        | 11 |         |    3 | 00/0824 : 20 6A FD    | GETLINE       JSR   $FD6A          ; get line of input, input length in X reg
+   31 |  1 bufferedio.s     31 | Code        | 11 |         |    1 | 00/0827 : 8A          |               TXA                  ; get input length into Accumulator
+   32 |  1 bufferedio.s     32 | Code        | 11 |         |    2 | 00/0828 : 85 07       |               STA   {$07}          ; put input length into $07
+   33 |  1 bufferedio.s     33 | Code        | 11 |         |    2 | 00/082A : A9 00       | CLEARPTR      LDA   #$00           ; load zero into Accumulator
+   34 |  1 bufferedio.s     34 | Code        | 11 |         |    2 | 00/082C : 85 06       |               STA   {$06}          ; put zero into $06, keyboard buffer pointer
+   35 |  1 bufferedio.s     35 | Code        | 11 |         |    2 | 00/082E : A9 04       |               LDA   #$04           ; load Accumulator with control byte "write to buffer"
+   36 |  1 bufferedio.s     36 | Code        | 11 |         |    3 | 00/0830 : 20 00 03    |               JSR   {$0300}        ; send control byte
+   37 |  1 bufferedio.s     37 | Code        | 11 |         |    2 | 00/0833 : A5 07       |               LDA   {$07}          ; load input length from $07
+   38 |  1 bufferedio.s     38 | Code        | 11 |         |    3 | 00/0835 : 20 00 03    |               JSR   {$0300}        ; send message length
+   39 |  1 bufferedio.s     39 | Code        | 11 |         |    2 | 00/0838 : A6 06       | LOADBUFFER    LDX   {$06}          ; load X with keyboard buffer pointer (LOADBUFFER)
+   40 |  1 bufferedio.s     40 | Code        | 11 |         |    3 | 00/083A : BD 00 02    |               LDA   {$0200},X      ; load Accumulator with bytes from keyboard buffer (start at $200)
+   41 |  1 bufferedio.s     41 | Code        | 11 |         |    2 | 00/083D : 29 7F       |               AND   #$7F           ; clear high bit (for ASCII on other end)
+   42 |  1 bufferedio.s     42 | Code        | 11 |         |    3 | 00/083F : 20 00 03    |               JSR   {$0300}        ; send byte
+   43 |  1 bufferedio.s     43 | Code        | 11 |         |    2 | 00/0842 : E6 06       |               INC   {$06}          ; increment keyboard buffer pointer
+   44 |  1 bufferedio.s     44 | Code        | 11 |         |    2 | 00/0844 : A5 06       |               LDA   {$06}          ; load buffer pointer into Accumulator
+   45 |  1 bufferedio.s     45 | Code        | 11 |         |    2 | 00/0846 : C5 07       |               CMP   {$07}          ; compare with message length
+   46 |  1 bufferedio.s     46 | Code        | 11 |         |    2 | 00/0848 : D0 EE       |               BNE   LOADBUFFER     ; if not at end of message, loop to (LOADBUFFER)
+   47 |  1 bufferedio.s     47 | Code        | 11 |         |    1 | 00/084A : 60          |               RTS                  ; return
+   48 |  1 bufferedio.s     48 | Empty       | 11 |         |    0 | 00/084B               |                                    
+   49 |  1 bufferedio.s     49 | Code        | 11 |         |    2 | 00/084B : A9 40       | QUERYBUFFER   LDA   #$40           ;	control byte for query buffer length
+   50 |  1 bufferedio.s     50 | Code        | 11 |         |    3 | 00/084D : 20 00 03    |               JSR   {$0300}        ;	send control byte
+   51 |  1 bufferedio.s     51 | Code        | 11 |         |    3 | 00/0850 : 20 5E 08    |               JSR   TWIDDLE        ;	wait routine - gives GP2IO time to receive bytes from serial
+   52 |  1 bufferedio.s     52 | Code        | 11 |         |    3 | 00/0853 : 8D 5C C0    | CTS           STA   {$C05C}        ;	set ANN2 to LOW (just in case it's floating high)
+   53 |  1 bufferedio.s     53 | Code        | 11 |         |    3 | 00/0856 : 20 4A 03    |               JSR   {$034A}        ;	CTS - ready for response byte with buffer length
+   54 |  1 bufferedio.s     54 | Code        | 11 |         |    2 | 00/0859 : F0 F0       |               BEQ   QUERYBUFFER    ;	if there's nothing in the buffer, loop until there is
+   55 |  1 bufferedio.s     55 | Code        | 11 |         |    2 | 00/085B : 85 08       |               STA   {$08}          ;	put the byte in $08
+   56 |  1 bufferedio.s     56 | Code        | 11 |         |    1 | 00/085D : 60          |               RTS                  ;	returns buffer length in $08 (BUFFERLENGTH)
+   57 |  1 bufferedio.s     57 | Empty       | 11 |         |    0 | 00/085E               |                                    
+   58 |  1 bufferedio.s     58 | Code        | 11 |         |    2 | 00/085E : A9 7C       | TWIDDLE       LDA   #$7C           ; |
+   59 |  1 bufferedio.s     59 | Code        | 11 |         |    3 | 00/0860 : 20 6F 08    |               JSR   PRINTCHAR      ;
+   60 |  1 bufferedio.s     60 | Code        | 11 |         |    2 | 00/0863 : A9 2F       |               LDA   #$2F           ; /
+   61 |  1 bufferedio.s     61 | Code        | 11 |         |    3 | 00/0865 : 20 6F 08    |               JSR   PRINTCHAR      ;
+   62 |  1 bufferedio.s     62 | Code        | 11 |         |    2 | 00/0868 : A9 2D       |               LDA   #$2D           ; -
+   63 |  1 bufferedio.s     63 | Code        | 11 |         |    3 | 00/086A : 20 6F 08    |               JSR   PRINTCHAR      ;
+   64 |  1 bufferedio.s     64 | Code        | 11 |         |    2 | 00/086D : A9 1C       |               LDA   #$1C           ; \
+   65 |  1 bufferedio.s     65 | Code        | 11 |         |    3 | 00/086F : 20 ED FD    | PRINTCHAR     JSR   {$FDED}        ; prints character to screen, high byte not set, inverse text
+   66 |  1 bufferedio.s     66 | Code        | 11 |         |    2 | 00/0872 : A9 AA       |               LDA   #$AA           ; speed of animation
+   67 |  1 bufferedio.s     67 | Code        | 11 |         |    3 | 00/0874 : 20 A8 FC    |               JSR   {$FCA8}        ; waits for a while
+   68 |  1 bufferedio.s     68 | Code        | 11 |         |    2 | 00/0877 : A9 88       |               LDA   #$88           ;  (backspace)
+   69 |  1 bufferedio.s     69 | Code        | 11 |         |    3 | 00/0879 : 20 ED FD    |               JSR   {$FDED}        ; backspaces over current char to overwrite
+   70 |  1 bufferedio.s     70 | Code        | 11 |         |    1 | 00/087C : 60          |               RTS                  ; RETURN
+   71 |  1 bufferedio.s     71 | Empty       | 11 |         |    0 | 00/087D               |                                    
+------+------------------------+-------------+----+---------+------+-----------------------+-------------------------------------------------------------------

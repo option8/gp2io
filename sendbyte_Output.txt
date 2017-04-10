@@ -1,0 +1,32 @@
+------+----------------------+-------------+----+---------+------+-----------------------+-------------------------------------------------------------------
+ Line | # File          Line | Line Type   | MX |  Reloc  | Size | Address   Object Code |  Source Code                                                      
+------+----------------------+-------------+----+---------+------+-----------------------+-------------------------------------------------------------------
+    1 |  1 sendbyte.s      1 | Directive   | 11 |         |    0 | 00/8000               |             ORG   $0300          
+    2 |  1 sendbyte.s      2 | Equivalence | 11 |         |    0 | 00/0300               | ANN0HI      EQU   $C059          
+    3 |  1 sendbyte.s      3 | Equivalence | 11 |         |    0 | 00/0300               | ANN0LO      EQU   $C058          
+    4 |  1 sendbyte.s      4 | Equivalence | 11 |         |    0 | 00/0300               | ANN1HI      EQU   $C05B          
+    5 |  1 sendbyte.s      5 | Equivalence | 11 |         |    0 | 00/0300               | ANN1LO      EQU   $C05A          
+    6 |  1 sendbyte.s      6 | Equivalence | 11 |         |    0 | 00/0300               | BYTETOSEND  EQU   $EF            
+    7 |  1 sendbyte.s      7 | Empty       | 11 |         |    0 | 00/0300               |                                  
+    8 |  1 sendbyte.s      8 | Code        | 11 |         |    2 | 00/0300 : A0 08       | SENDBYTE    LDY   #$08           ; load 8 for a full byte, loop counter
+    9 |  1 sendbyte.s      9 | Code        | 11 |         |    2 | 00/0302 : 85 EF       |             STA   {$EF}          ; put byte in zero page for safe keeping
+   10 |  1 sendbyte.s     10 | Code        | 11 |         |    3 | 00/0304 : 8D 59 C0    | RTS         STA   {$C059}        ; annunciator 0 high, RTS
+   11 |  1 sendbyte.s     11 | Code        | 11 |         |    2 | 00/0307 : 26 EF       | SENDBIT     ROL   {$EF}          ; rotate byte left, high/MSB out to carry (sendbit)
+   12 |  1 sendbyte.s     12 | Code        | 11 |         |    2 | 00/0309 : 90 05       |             BCC   SHORTLOOP      ; "branch on carry clear" - if carry/bit = 0, goto #311 (short loop)
+   13 |  1 sendbyte.s     13 | Code        | 11 |         |    2 | 00/030B : A2 14       | LONGLOOP    LDX   #$14           ; if carry/bit = 1, load X with 20 (long loop)
+   14 |  1 sendbyte.s     14 | Code        | 11 |         |    3 | 00/030D : 4C 12 03    |             JMP   SETANN1        ; jump over SHORTLOOP
+   15 |  1 sendbyte.s     15 | Code        | 11 |         |    2 | 00/0310 : A2 0A       | SHORTLOOP   LDX   #$0A           ; if carry/bit = 0, load X with 10 (short loop)
+   16 |  1 sendbyte.s     16 | Code        | 11 |         |    3 | 00/0312 : 8D 5B C0    | SETANN1     STA   {$C05B}        ; set annunciator 1 HIGH
+   17 |  1 sendbyte.s     17 | Code        | 11 |         |    1 | 00/0315 : CA          | COUNTDOWN   DEX                  ; decrement, countdown to setting ANN1 low (COUNTDOWN)
+   18 |  1 sendbyte.s     18 | Code        | 11 |         |    2 | 00/0316 : D0 FD       |             BNE   COUNTDOWN      ; if X > 0, keep counting (goto COUNTDOWN)
+   19 |  1 sendbyte.s     19 | Code        | 11 |         |    3 | 00/0318 : 8D 5A C0    |             STA   {$C05A}        ; if done, set ANN1 LOW, countdown to getting next bit
+   20 |  1 sendbyte.s     20 | Code        | 11 |         |    2 | 00/031B : A2 05       |             LDX   #$05           ; reset counter for short "reset" transition. This lets the GP2IO stage the bit before the next interrupt
+   21 |  1 sendbyte.s     21 | Code        | 11 |         |    1 | 00/031D : CA          | COUNTDOWN2  DEX                  ; count down again (COUNTDOWN2)
+   22 |  1 sendbyte.s     22 | Code        | 11 |         |    2 | 00/031E : D0 FD       |             BNE   COUNTDOWN2     ; if X > 0, keep counting (goto COUNTDOWN2)
+   23 |  1 sendbyte.s     23 | Code        | 11 |         |    1 | 00/0320 : 88          |             DEY                  ; decrement y, countdown bits sent
+   24 |  1 sendbyte.s     24 | Code        | 11 |         |    2 | 00/0321 : D0 E4       |             BNE   SENDBIT        ; if y > 0, next bit (SENDBIT)
+   25 |  1 sendbyte.s     25 | Code        | 11 |         |    3 | 00/0323 : 8D 58 C0    | RTSOFF      STA   {$C058}        ; annunciator 0 low, sending RTS OFF
+   26 |  1 sendbyte.s     26 | Code        | 11 |         |    1 | 00/0326 : 60          |             RTS                  ; return
+   27 |  1 sendbyte.s     27 | Empty       | 11 |         |    0 | 00/0327               |                                  
+   28 |  1 sendbyte.s     28 | Empty       | 11 |         |    0 | 00/0327               |                                  
+------+----------------------+-------------+----+---------+------+-----------------------+-------------------------------------------------------------------

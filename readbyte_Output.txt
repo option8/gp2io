@@ -1,0 +1,33 @@
+------+----------------------+-------------+----+---------+------+-----------------------+-------------------------------------------------------------------
+ Line | # File          Line | Line Type   | MX |  Reloc  | Size | Address   Object Code |  Source Code                                                      
+------+----------------------+-------------+----+---------+------+-----------------------+-------------------------------------------------------------------
+    1 |  1 readbyte.s      1 | Directive   | 11 |         |    0 | 00/8000               |             ORG   $34A           
+    2 |  1 readbyte.s      2 | Equivalence | 11 |         |    0 | 00/034A               | ANN2HI      EQU   $C05D          
+    3 |  1 readbyte.s      3 | Equivalence | 11 |         |    0 | 00/034A               | ANN2LO      EQU   $C05C          
+    4 |  1 readbyte.s      4 | Equivalence | 11 |         |    0 | 00/034A               | BUTT1       EQU   $C062          
+    5 |  1 readbyte.s      5 | Equivalence | 11 |         |    0 | 00/034A               | BYTETRCVD   EQU   $EF            
+    6 |  1 readbyte.s      6 | Equivalence | 11 |         |    0 | 00/034A               | BUTT1HILO   EQU   $EE            
+    7 |  1 readbyte.s      7 | Empty       | 11 |         |    0 | 00/034A               |                                  
+    8 |  1 readbyte.s      8 | Empty       | 11 |         |    0 | 00/034A               |                                  
+    9 |  1 readbyte.s      9 | Code        | 11 |         |    2 | 00/034A : A2 09       | READBYTE    LDX   #$09           ; reading 8 bits requires 9 transitions.
+   10 |  1 readbyte.s     10 | Code        | 11 |         |    2 | 00/034C : A9 00       |             LDA   #$00           ; clear the accumulator
+   11 |  1 readbyte.s     11 | Code        | 11 |         |    2 | 00/034E : 85 EF       |             STA   {$EF}          ; $EF is staging for received byte, set 0
+   12 |  1 readbyte.s     12 | Code        | 11 |         |    2 | 00/0350 : 85 EE       |             STA   {$EE}          ; $EE is staging for each bit, set 0
+   13 |  1 readbyte.s     13 | Code        | 11 |         |    3 | 00/0352 : 8D 5D C0    | CTS         STA   {$C05D}        ; set ANN2 HIGH, indicate to AVR "Clear to Send"
+   14 |  1 readbyte.s     14 | Code        | 11 |         |    2 | 00/0355 : A0 FF       | LOOPSTART   LDY   #$FF           ;	start wait loop
+   15 |  1 readbyte.s     15 | Code        | 11 |         |    1 | 00/0357 : C8          | LOOPCOUNT   INY                  ; Increment Y - rolls over to 0 on first run (loopcount)
+   16 |  1 readbyte.s     16 | Code        | 11 |         |    3 | 00/0358 : AD 62 C0    |             LDA   {$C062}        ;	check PB1 status hi/low
+   17 |  1 readbyte.s     17 | Code        | 11 |         |    2 | 00/035B : 29 80       |             AND   #$80           ;	clear 0-6 bits (just need bit 7, all others float)
+   18 |  1 readbyte.s     18 | Code        | 11 |         |    2 | 00/035D : C5 EE       |             CMP   {$EE}          ; compare Accumulator 7 bit with $EE, previous PB2 value
+   19 |  1 readbyte.s     19 | Code        | 11 |         |    2 | 00/035F : D0 02       |             BNE   BITCHANGE      ; if PB2 has changed state, store in $EE (bitchange)
+   20 |  1 readbyte.s     20 | Code        | 11 |         |    2 | 00/0361 : F0 F4       |             BEQ   LOOPCOUNT      ; bit hasn't changed yet, return to (loopcount)
+   21 |  1 readbyte.s     21 | Code        | 11 |         |    2 | 00/0363 : 85 EE       | BITCHANGE   STA   {$EE}          ; (bitchange)
+   22 |  1 readbyte.s     22 | Code        | 11 |         |    2 | 00/0365 : C0 44       |             CPY   #$44           ; if the loop count is more than 68, bit is one. Bit is set in Carry
+   23 |  1 readbyte.s     23 | Code        | 11 |         |    2 | 00/0367 : 26 EF       |             ROL   {$EF}          ; rotate the new bit into $EF, our result byte.
+   24 |  1 readbyte.s     24 | Code        | 11 |         |    1 | 00/0369 : CA          |             DEX                  ; decrement X, our bit count
+   25 |  1 readbyte.s     25 | Code        | 11 |         |    2 | 00/036A : D0 E9       |             BNE   LOOPSTART      ; if bit count is not yet full, loop back to (loopcount)
+   26 |  1 readbyte.s     26 | Code        | 11 |         |    3 | 00/036C : 8D 5C C0    | CTSOFF      STA   {$C05C}        ; if bit count is full, set ANN2 LOW, CTS off
+   27 |  1 readbyte.s     27 | Code        | 11 |         |    2 | 00/036F : A5 EF       |             LDA   {$EF}          ; puts received byte into Accumulator
+   28 |  1 readbyte.s     28 | Code        | 11 |         |    1 | 00/0371 : 60          |             RTS                  ; return with byte in Accumulator
+   29 |  1 readbyte.s     29 | Empty       | 11 |         |    0 | 00/0372               |                                  
+------+----------------------+-------------+----+---------+------+-----------------------+-------------------------------------------------------------------

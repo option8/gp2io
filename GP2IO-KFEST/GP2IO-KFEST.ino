@@ -26,6 +26,16 @@
   CLRAN3 =   $C05F ;Set annunciator-3 output to 1
 
 
+..xx xx.. 3C
+.x.. ..x. 42
+x.x. .x.x a5
+x.x. .x.x a5
+x... ...x 81
+x.x. .x.x a5 
+.x.x x.x. 5a
+..xx xx.. 3c
+
+
 */
 
 // I2C
@@ -89,10 +99,10 @@ byte bufferLength[1];
   B10101110,
   B01101010,
   B10101110
-  };*/
+  };
 
 byte I2CBuffer[8] = {
-  B01111010, /* bit 7--0 */
+  B01111010,
   B10111000,
   B00000000,
   B10111000,
@@ -100,8 +110,27 @@ byte I2CBuffer[8] = {
   B10101110,
   B01101010,
   B10101110
+};*/
+
+byte I2CBuffer[8] = {
+  B01010101, /* bit 7--0 */
+  B10101010,
+  B01010101,
+  B10101010,
+  B01010101,
+  B10101010,
+  B01010101,
+  B10101010
 };
+
+
+
+
 /*
+ *
+ *
+ *
+ *
            1
           ---
        6 | 7 | 2
@@ -126,9 +155,9 @@ byte ESPByte;
 
 const int LED_PIN = 11;
 
-int RGB_RED = 9;
-int RGB_GREEN = 10;
-int RGB_BLUE = 4;
+int RGB_RED = 10;
+int RGB_GREEN = 4;
+int RGB_BLUE = 9;
 
 int ANN0_PIN = 5;
 int ANN1_PIN = 6;
@@ -159,30 +188,6 @@ int functionArray[] =
 //DEBUG is active until the AVR is reset or input timeout is reached.
 
 void setup() {
-  //LED MATRIX / 7 segment display
-
-  if (!i2c_init()) {
-    Serial.println("I2C error. SDA or SCL are low");
-  }
-  if (!i2c_start(i2c_addr) ) {
-    Serial.println("I2C device not found");
-  }
-
-  i2c_write(0x21);  // turn on oscillator
-  i2c_stop();
-
-  // set blinkrate 0
-  i2c_start(i2c_addr);
-  i2c_write(HT16K33_BLINK_CMD | HT16K33_BLINK_DISPLAYON | (0 << 1));
-  i2c_stop();
-
-  // set brightness to 15/15
-  i2c_start(i2c_addr);
-  i2c_write(HT16K33_CMD_BRIGHTNESS | 15);
-  i2c_stop();
-
-  writeI2C();  // "Good"/"ok"
-
 
   pinMode(ANN2_PIN, INPUT); // annunciator 2
   pinMode(ANN3_PIN, INPUT); // annunciator 3
@@ -207,15 +212,64 @@ void setup() {
   digitalWrite(LED_PIN, LOW);
 
 
+  /*
+  pinMode(14, OUTPUT);
+  digitalWrite(14, HIGH);
+  pinMode(15, OUTPUT);
+  digitalWrite(15, HIGH);
+  pinMode(16, OUTPUT);
+  digitalWrite(16, HIGH);
+  pinMode(17, OUTPUT);
+  digitalWrite(17, HIGH);
+  pinMode(18, OUTPUT);
+  digitalWrite(18, HIGH);
+  pinMode(19, OUTPUT);
+  digitalWrite(19, HIGH);
+  pinMode(20, OUTPUT);
+  digitalWrite(20, HIGH);
+  pinMode(21, OUTPUT);
+  digitalWrite(21, HIGH);
+  */
+
   Serial.begin(baud);
   // to ESP, other serial devices
-  HWSERIAL.begin(baud);
+  //  HWSERIAL.begin(baud);
 
   enablePinInterrupt(ANN2_PIN); // Apple ready to receive
   attachInterrupt(0, APPLERTS, RISING); // ANNUNCIATOR 0, Apple sending byte
   attachInterrupt(1, RECEIVINGBITS, CHANGE); // ANNUNCIATOR 1, Apple sending bits
 
-  setRGBOneShot(0, 0, 200); // blue = ready
+  setRGBOneShot(200, 200, 200); // blue = ready
+
+
+  //LED MATRIX / 7 segment display
+
+  if (!i2c_init()) {
+    Serial.println("I2C error. SDA or SCL are low");
+  }
+  if (!i2c_start(i2c_addr) ) {
+    Serial.println("I2C device not found");
+  }
+
+  i2c_write(0x21);  // turn on oscillator
+  i2c_stop();
+
+  // set blinkrate 0
+  i2c_start(i2c_addr);
+  i2c_write(HT16K33_BLINK_CMD | HT16K33_BLINK_DISPLAYON | (0 << 1));
+  i2c_stop();
+
+  // set brightness to 15/15
+  i2c_start(i2c_addr);
+  i2c_write(HT16K33_CMD_BRIGHTNESS | 15);
+  i2c_stop();
+
+  writeI2C();  // "Good"/"ok"
+  ClearI2C();
+
+
+
+
 }
 
 void loop()
@@ -247,6 +301,8 @@ void loop()
   }
 
 
+
+
 } //loop
 
 void IOMODERESET(long resetTime, String reason) {
@@ -260,7 +316,7 @@ void IOMODERESET(long resetTime, String reason) {
     Serial.print("MODE RESET ");
     Serial.println(reason);
     // Serial.println(TIMESINCELASTBYTE);
-    setRGBOneShot(0, 0, 200);
+    setRGBOneShot(200, 200, 200);
 
     digitalWrite(PB0_PIN, LOW); // RTS off
     digitalWrite(PB1_PIN, LOW); // Bits out
@@ -270,6 +326,7 @@ void IOMODERESET(long resetTime, String reason) {
     // Serial.write(HWSERIALBuffer, 256);
 
   }
+
 }
 
 
@@ -370,7 +427,7 @@ void sendByte (byte byteToSend, bool oneShot) {
 
 
 void APPLERTS() {
-  // signal to start receiving bits from Apple II
+  // signal to start receiving bits from Apple II"
   bitCount = 0;
   changeCount = 0;
   returnByte = B00000000;
@@ -453,6 +510,9 @@ void RECEIVINGBITS()
 
 
 void PROCESSBYTE(byte receivedByte) {
+
+
+
   //  char longstring[80] = "AT+CIPSTART=\"TCP\",\"www.option8llc.com\",80\n\r";
   //  int rd, wr;
   String connectString;
@@ -665,16 +725,18 @@ void PROCESSBYTE(byte receivedByte) {
       case 4: // read and buffer 8 bytes to I2C buffer for matrix/7segment display
         if (functionLength == -1) { // first byte == message length
           functionLength = receivedByte;
-          Serial.print("I2C ");
-          Serial.println(functionLength);
+        Serial.print("L");
+        Serial.println(functionLength);
         } else {
           I2CBuffer[functionLength - 1] = receivedByte;
-          Serial.println(receivedByte);
+        //  Serial.print("I2C Buffer ");
+        //  Serial.print(functionLength);
+        //  Serial.println(I2CBuffer[functionLength - 1]);
 
           functionLength --;
           if (functionLength == 0) {
             writeI2C();
-            Serial.print("I2C DONE");
+           // Serial.print("I2C DONE");
           }
 
         }
@@ -800,7 +862,7 @@ void drawPixel(int16_t x, int16_t y, uint16_t color) {
   //  if ((x < 0) || (x >= 8)) return;
 
   // wrap around the x
-  x += 7; // 0,0 => 7,0 // 7,0 => 14,0 // 1,0 => 8,0
+  x += 7; // 0,0 => 7,0 // 7,0 => 14,0 // 1,0 => 8,0se
   x %= 8; // 7,0 => 7,0 // 14,0 => 6,0 // 8,0 => 0,0
 
   if (color) {
@@ -824,14 +886,21 @@ void writeI2C(void) {
   i2c_write(0x00); // start address $00
 
   for (uint8_t i = 0; i < 8; i++) {
+   // Serial.print("I2C write ");
+   // Serial.println(I2CBuffer[i]);
+
     // rotate the byte right by 1. "carry" bit gets rolled around
     I2CBuffer[i] = ((I2CBuffer[i] & 0x01) ? 0x80 : 0x00) | (I2CBuffer[i] >> 1);
     // seriously? ROR.
 
     i2c_write(I2CBuffer[i]); // write the bits to turn on/off pixels
     i2c_write(0xff); // control/bitmask?
+
+
+
   }
   i2c_stop();
+ // Serial.println("I2C WROTE");
 }
 
 void ClearI2C(void) {
