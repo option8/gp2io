@@ -55,7 +55,7 @@ CTS				STA   ANN2LO		;	set ANN2 to LOW (just in case it's floating high)
 				STA   BUFFERLENGTH	;	put the byte in $08
 				RTS					;	returns buffer length in $08 (BUFFERLENGTH)
 
-TWIDDLE			LDA   #$7C			; |
+TWIDDLE			LDA   #$21			; ! (inverse)
 				JSR   PRINTCHAR		;
 				LDA   #$2F			; /
 				JSR   PRINTCHAR		;

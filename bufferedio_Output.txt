@@ -58,7 +58,7 @@
    55 |  1 bufferedio.s     55 | Code        | 11 |         |    2 | 00/085B : 85 08       |               STA   {$08}          ;	put the byte in $08
    56 |  1 bufferedio.s     56 | Code        | 11 |         |    1 | 00/085D : 60          |               RTS                  ;	returns buffer length in $08 (BUFFERLENGTH)
    57 |  1 bufferedio.s     57 | Empty       | 11 |         |    0 | 00/085E               |                                    
-   58 |  1 bufferedio.s     58 | Code        | 11 |         |    2 | 00/085E : A9 7C       | TWIDDLE       LDA   #$7C           ; |
+   58 |  1 bufferedio.s     58 | Code        | 11 |         |    2 | 00/085E : A9 21       | TWIDDLE       LDA   #$21           ; ! (inverse)
    59 |  1 bufferedio.s     59 | Code        | 11 |         |    3 | 00/0860 : 20 6F 08    |               JSR   PRINTCHAR      ;
    60 |  1 bufferedio.s     60 | Code        | 11 |         |    2 | 00/0863 : A9 2F       |               LDA   #$2F           ; /
    61 |  1 bufferedio.s     61 | Code        | 11 |         |    3 | 00/0865 : 20 6F 08    |               JSR   PRINTCHAR      ;
