@@ -1,0 +1,26 @@
+------+---------------------+-------------+----+---------+------+-----------------------+-------------------------------------------------------------------
+ Line | # File         Line | Line Type   | MX |  Reloc  | Size | Address   Object Code |  Source Code                                                      
+------+---------------------+-------------+----+---------+------+-----------------------+-------------------------------------------------------------------
+    1 |  1 twiddle.s      1 | Directive   | 11 |         |    0 | 00/8000               |             ORG   $300           
+    2 |  1 twiddle.s      2 | Empty       | 11 |         |    0 | 00/0300               |                                  
+    3 |  1 twiddle.s      3 | Code        | 11 |         |    2 | 00/0300 : A0 7F       |             LDY   #$7F           
+    4 |  1 twiddle.s      4 | Code        | 11 |         |    3 | 00/0302 : 20 09 03    | LOOPTY      JSR   TWIDDLE        
+    5 |  1 twiddle.s      5 | Code        | 11 |         |    1 | 00/0305 : 88          |             DEY                  
+    6 |  1 twiddle.s      6 | Code        | 11 |         |    2 | 00/0306 : D0 FA       |             BNE   LOOPTY         
+    7 |  1 twiddle.s      7 | Code        | 11 |         |    1 | 00/0308 : 60          |             RTS                  
+    8 |  1 twiddle.s      8 | Empty       | 11 |         |    0 | 00/0309               |                                  
+    9 |  1 twiddle.s      9 | Code        | 11 |         |    2 | 00/0309 : A9 21       | TWIDDLE     LDA   #$21           
+   10 |  1 twiddle.s     10 | Code        | 11 |         |    3 | 00/030B : 20 1A 03    |             JSR   PRINTCHAR      
+   11 |  1 twiddle.s     11 | Code        | 11 |         |    2 | 00/030E : A9 2F       |             LDA   #$2F           
+   12 |  1 twiddle.s     12 | Code        | 11 |         |    3 | 00/0310 : 20 1A 03    |             JSR   PRINTCHAR      
+   13 |  1 twiddle.s     13 | Code        | 11 |         |    2 | 00/0313 : A9 2D       |             LDA   #$2D           
+   14 |  1 twiddle.s     14 | Code        | 11 |         |    3 | 00/0315 : 20 1A 03    |             JSR   PRINTCHAR      
+   15 |  1 twiddle.s     15 | Code        | 11 |         |    2 | 00/0318 : A9 1C       |             LDA   #$1C           
+   16 |  1 twiddle.s     16 | Code        | 11 |         |    3 | 00/031A : 20 ED FD    | PRINTCHAR   JSR   $FDED          
+   17 |  1 twiddle.s     17 | Code        | 11 |         |    2 | 00/031D : A9 AA       |             LDA   #$AA           
+   18 |  1 twiddle.s     18 | Code        | 11 |         |    3 | 00/031F : 20 A8 FC    |             JSR   $FCA8          
+   19 |  1 twiddle.s     19 | Code        | 11 |         |    2 | 00/0322 : A9 88       |             LDA   #$88           
+   20 |  1 twiddle.s     20 | Code        | 11 |         |    3 | 00/0324 : 20 ED FD    |             JSR   $FDED          
+   21 |  1 twiddle.s     21 | Code        | 11 |         |    1 | 00/0327 : 60          |             RTS                  
+   22 |  1 twiddle.s     22 | Empty       | 11 |         |    0 | 00/0328               |                                  
+------+---------------------+-------------+----+---------+------+-----------------------+-------------------------------------------------------------------
