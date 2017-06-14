@@ -1,0 +1,126 @@
+------+-------------------+-------------+----+---------+------+-----------------------+-------------------------------------------------------------------
+ Line | # File       Line | Line Type   | MX |  Reloc  | Size | Address   Object Code |  Source Code                                                      
+------+-------------------+-------------+----+---------+------+-----------------------+-------------------------------------------------------------------
+    1 |  1 GP2IO.s      1 | Directive   | 11 |         |    0 | 00/8000               |               ORG   $800           
+    2 |  1 GP2IO.s      2 | Empty       | 11 |         |    0 | 00/0800               |                                    
+    3 |  1 GP2IO.s      3 | Equivalence | 11 |         |    0 | 00/0800               | BUFFERLENGTH  EQU   $08            
+    4 |  1 GP2IO.s      4 | Equivalence | 11 |         |    0 | 00/0800               | INPUTLENGTH   EQU   $07            
+    5 |  1 GP2IO.s      5 | Equivalence | 11 |         |    0 | 00/0800               | INPUTPTR      EQU   $06            
+    6 |  1 GP2IO.s      6 | Empty       | 11 |         |    0 | 00/0800               |                                    
+    7 |  1 GP2IO.s      7 | Equivalence | 11 |         |    0 | 00/0800               | BYTETOSEND    EQU   $ED            
+    8 |  1 GP2IO.s      8 | Equivalence | 11 |         |    0 | 00/0800               | BYTETRCVD     EQU   $EF            
+    9 |  1 GP2IO.s      9 | Equivalence | 11 |         |    0 | 00/0800               | BUTT1HILO     EQU   $EE            
+   10 |  1 GP2IO.s     10 | Empty       | 11 |         |    0 | 00/0800               |                                    
+   11 |  1 GP2IO.s     11 | Equivalence | 11 |         |    0 | 00/0800               | ANN0HI        EQU   $C059          
+   12 |  1 GP2IO.s     12 | Equivalence | 11 |         |    0 | 00/0800               | ANN0LO        EQU   $C058          
+   13 |  1 GP2IO.s     13 | Equivalence | 11 |         |    0 | 00/0800               | ANN1HI        EQU   $C05B          
+   14 |  1 GP2IO.s     14 | Equivalence | 11 |         |    0 | 00/0800               | ANN1LO        EQU   $C05A          
+   15 |  1 GP2IO.s     15 | Equivalence | 11 |         |    0 | 00/0800               | ANN2HI        EQU   $C05D          
+   16 |  1 GP2IO.s     16 | Equivalence | 11 |         |    0 | 00/0800               | ANN2LO        EQU   $C05C          
+   17 |  1 GP2IO.s     17 | Equivalence | 11 |         |    0 | 00/0800               | BUTT1         EQU   $C062          
+   18 |  1 GP2IO.s     18 | Empty       | 11 |         |    0 | 00/0800               |                                    
+   19 |  1 GP2IO.s     19 | Equivalence | 11 |         |    0 | 00/0800               | WAIT          EQU   $FCA8          
+   20 |  1 GP2IO.s     20 | Equivalence | 11 |         |    0 | 00/0800               | PRINTCR       EQU   $FD8E          
+   21 |  1 GP2IO.s     21 | Equivalence | 11 |         |    0 | 00/0800               | PRINTBYTE     EQU   $FDED          
+   22 |  1 GP2IO.s     22 | Equivalence | 11 |         |    0 | 00/0800               | KEYBUFFER     EQU   $0200          
+   23 |  1 GP2IO.s     23 | Empty       | 11 |         |    0 | 00/0800               |                                    
+   24 |  1 GP2IO.s     24 | Code        | 11 |         |    3 | 00/0800 : 20 4B 08    | BUFFERIO      JSR   QUERYBUFFER    ; start by querying the buffer length - is there anything waiting? returns with buffer length in $08
+   25 |  1 GP2IO.s     25 | Code        | 11 |         |    2 | 00/0803 : A9 80       |               LDA   #$80           ; load control byte $80 "send buffer bytes"
+   26 |  1 GP2IO.s     26 | Code        | 11 |         |    3 | 00/0805 : 20 7D 08    |               JSR   SENDBYTE       ; send control byte
+   27 |  1 GP2IO.s     27 | Code        | 11 |         |    2 | 00/0808 : A5 08       |               LDA   {$08}          ; load buffer length (or however much buffer you want sent)
+   28 |  1 GP2IO.s     28 | Code        | 11 |         |    3 | 00/080A : 20 7D 08    |               JSR   SENDBYTE       ; send message length byte
+   29 |  1 GP2IO.s     29 | Code        | 11 |         |    2 | 00/080D : A9 28       | BETWEENBYTES  LDA   #$28           ; wait a moment (betweenbytes)
+   30 |  1 GP2IO.s     30 | Code        | 11 |         |    3 | 00/080F : 20 A8 FC    |               JSR   {$FCA8}        ; wait
+   31 |  1 GP2IO.s     31 | Code        | 11 |         |    3 | 00/0812 : 20 A4 08    |               JSR   READBYTE       ; CTS - send byte
+   32 |  1 GP2IO.s     32 | Code        | 11 |         |    2 | 00/0815 : 09 80       |               ORA   #$80           ; clear byte 7 (for ASCII)
+   33 |  1 GP2IO.s     33 | Code        | 11 |         |    3 | 00/0817 : 20 ED FD    |               JSR   {$FDED}        ; display byte on screen
+   34 |  1 GP2IO.s     34 | Code        | 11 |         |    2 | 00/081A : C6 08       |               DEC   {$08}          ; count down bytes (countdownbuffer)
+   35 |  1 GP2IO.s     35 | Code        | 11 |         |    2 | 00/081C : A5 08       |               LDA   {$08}          ; load Accumulator with new buffer length
+   36 |  1 GP2IO.s     36 | Code        | 11 |         |    2 | 00/081E : D0 ED       |               BNE   BETWEENBYTES   ; if there's more to come, loop (betweenbytes)
+   37 |  1 GP2IO.s     37 | Code        | 11 |         |    3 | 00/0820 : 20 8E FD    |               JSR   {$FD8E}        ; last byte. print CF/LF
+   38 |  1 GP2IO.s     38 | Code        | 11 |         |    1 | 00/0823 : 60          |               RTS                  ; return
+   39 |  1 GP2IO.s     39 | Empty       | 11 |         |    0 | 00/0824               |                                    
+   40 |  1 GP2IO.s     40 | Code        | 11 |         |    3 | 00/0824 : 20 6A FD    | GETLINE       JSR   $FD6A          ; get line of input, input length in X reg
+   41 |  1 GP2IO.s     41 | Code        | 11 |         |    1 | 00/0827 : 8A          |               TXA                  ; get input length into Accumulator
+   42 |  1 GP2IO.s     42 | Code        | 11 |         |    2 | 00/0828 : 85 07       |               STA   {$07}          ; put input length into $07
+   43 |  1 GP2IO.s     43 | Code        | 11 |         |    2 | 00/082A : A9 00       | CLEARPTR      LDA   #$00           ; load zero into Accumulator
+   44 |  1 GP2IO.s     44 | Code        | 11 |         |    2 | 00/082C : 85 06       |               STA   {$06}          ; put zero into $06, keyboard buffer pointer
+   45 |  1 GP2IO.s     45 | Code        | 11 |         |    2 | 00/082E : A9 04       |               LDA   #$04           ; load Accumulator with control byte "write to buffer"
+   46 |  1 GP2IO.s     46 | Code        | 11 |         |    3 | 00/0830 : 20 7D 08    |               JSR   SENDBYTE       ; send control byte
+   47 |  1 GP2IO.s     47 | Code        | 11 |         |    2 | 00/0833 : A5 07       |               LDA   {$07}          ; load input length from $07
+   48 |  1 GP2IO.s     48 | Code        | 11 |         |    3 | 00/0835 : 20 7D 08    |               JSR   SENDBYTE       ; send message length
+   49 |  1 GP2IO.s     49 | Code        | 11 |         |    2 | 00/0838 : A6 06       | LOADBUFFER    LDX   {$06}          ; load X with keyboard buffer pointer (LOADBUFFER)
+   50 |  1 GP2IO.s     50 | Code        | 11 |         |    3 | 00/083A : BD 00 02    |               LDA   {$0200},X      ; load Accumulator with bytes from keyboard buffer (start at $200)
+   51 |  1 GP2IO.s     51 | Code        | 11 |         |    2 | 00/083D : 29 7F       |               AND   #$7F           ; clear high bit (for ASCII on other end)
+   52 |  1 GP2IO.s     52 | Code        | 11 |         |    3 | 00/083F : 20 7D 08    |               JSR   SENDBYTE       ; send byte
+   53 |  1 GP2IO.s     53 | Code        | 11 |         |    2 | 00/0842 : E6 06       |               INC   {$06}          ; increment keyboard buffer pointer
+   54 |  1 GP2IO.s     54 | Code        | 11 |         |    2 | 00/0844 : A5 06       |               LDA   {$06}          ; load buffer pointer into Accumulator
+   55 |  1 GP2IO.s     55 | Code        | 11 |         |    2 | 00/0846 : C5 07       |               CMP   {$07}          ; compare with message length
+   56 |  1 GP2IO.s     56 | Code        | 11 |         |    2 | 00/0848 : D0 EE       |               BNE   LOADBUFFER     ; if not at end of message, loop to (LOADBUFFER)
+   57 |  1 GP2IO.s     57 | Code        | 11 |         |    1 | 00/084A : 60          |               RTS                  ; return
+   58 |  1 GP2IO.s     58 | Empty       | 11 |         |    0 | 00/084B               |                                    
+   59 |  1 GP2IO.s     59 | Code        | 11 |         |    2 | 00/084B : A9 40       | QUERYBUFFER   LDA   #$40           ;	control byte for query buffer length
+   60 |  1 GP2IO.s     60 | Code        | 11 |         |    3 | 00/084D : 20 7D 08    |               JSR   SENDBYTE       ;	send control byte
+   61 |  1 GP2IO.s     61 | Code        | 11 |         |    3 | 00/0850 : 20 5E 08    |               JSR   TWIDDLE        ;	wait routine - gives GP2IO time to receive bytes from serial
+   62 |  1 GP2IO.s     62 | Code        | 11 |         |    3 | 00/0853 : 8D 5C C0    | CTS           STA   {$C05C}        ;	set ANN2 to LOW (just in case it's floating high)
+   63 |  1 GP2IO.s     63 | Code        | 11 |         |    3 | 00/0856 : 20 A4 08    |               JSR   READBYTE       ;	CTS - ready for response byte with buffer length
+   64 |  1 GP2IO.s     64 | Code        | 11 |         |    2 | 00/0859 : F0 F0       |               BEQ   QUERYBUFFER    ;	if there's nothing in the buffer, loop until there is
+   65 |  1 GP2IO.s     65 | Code        | 11 |         |    2 | 00/085B : 85 08       |               STA   {$08}          ;	put the byte in $08
+   66 |  1 GP2IO.s     66 | Code        | 11 |         |    1 | 00/085D : 60          |               RTS                  ;	returns buffer length in $08 (BUFFERLENGTH)
+   67 |  1 GP2IO.s     67 | Empty       | 11 |         |    0 | 00/085E               |                                    
+   68 |  1 GP2IO.s     68 | Code        | 11 |         |    2 | 00/085E : A9 21       | TWIDDLE       LDA   #$21           ; ! (inverse)
+   69 |  1 GP2IO.s     69 | Code        | 11 |         |    3 | 00/0860 : 20 6F 08    |               JSR   PRINTCHAR      ;
+   70 |  1 GP2IO.s     70 | Code        | 11 |         |    2 | 00/0863 : A9 2F       |               LDA   #$2F           ; /
+   71 |  1 GP2IO.s     71 | Code        | 11 |         |    3 | 00/0865 : 20 6F 08    |               JSR   PRINTCHAR      ;
+   72 |  1 GP2IO.s     72 | Code        | 11 |         |    2 | 00/0868 : A9 2D       |               LDA   #$2D           ; -
+   73 |  1 GP2IO.s     73 | Code        | 11 |         |    3 | 00/086A : 20 6F 08    |               JSR   PRINTCHAR      ;
+   74 |  1 GP2IO.s     74 | Code        | 11 |         |    2 | 00/086D : A9 1C       |               LDA   #$1C           ; \
+   75 |  1 GP2IO.s     75 | Code        | 11 |         |    3 | 00/086F : 20 ED FD    | PRINTCHAR     JSR   {$FDED}        ; prints character to screen, high byte not set, inverse text
+   76 |  1 GP2IO.s     76 | Code        | 11 |         |    2 | 00/0872 : A9 AA       |               LDA   #$AA           ; speed of animation
+   77 |  1 GP2IO.s     77 | Code        | 11 |         |    3 | 00/0874 : 20 A8 FC    |               JSR   {$FCA8}        ; waits for a while
+   78 |  1 GP2IO.s     78 | Code        | 11 |         |    2 | 00/0877 : A9 88       |               LDA   #$88           ;  (backspace)
+   79 |  1 GP2IO.s     79 | Code        | 11 |         |    3 | 00/0879 : 20 ED FD    |               JSR   {$FDED}        ; backspaces over current char to overwrite
+   80 |  1 GP2IO.s     80 | Code        | 11 |         |    1 | 00/087C : 60          |               RTS                  ; RETURN
+   81 |  1 GP2IO.s     81 | Empty       | 11 |         |    0 | 00/087D               |                                    
+   82 |  1 GP2IO.s     82 | Code        | 11 |         |    2 | 00/087D : A0 08       | SENDBYTE      LDY   #$08           ; load 8 for a full byte, loop counter
+   83 |  1 GP2IO.s     83 | Code        | 11 |         |    2 | 00/087F : 85 ED       |               STA   {$ED}          ; put byte in zero page for safe keeping
+   84 |  1 GP2IO.s     84 | Code        | 11 |         |    3 | 00/0881 : 8D 59 C0    | RTS           STA   {$C059}        ; annunciator 0 high, RTS
+   85 |  1 GP2IO.s     85 | Code        | 11 |         |    2 | 00/0884 : 26 ED       | SENDBIT       ROL   {$ED}          ; rotate byte left, high/MSB out to carry (sendbit)
+   86 |  1 GP2IO.s     86 | Code        | 11 |         |    2 | 00/0886 : 90 05       |               BCC   SHORTLOOP      ; "branch on carry clear" - if carry/bit = 0, goto #311 (short loop)
+   87 |  1 GP2IO.s     87 | Code        | 11 |         |    2 | 00/0888 : A2 14       | LONGLOOP      LDX   #$14           ; if carry/bit = 1, load X with 20 (long loop)
+   88 |  1 GP2IO.s     88 | Code        | 11 |         |    3 | 00/088A : 4C 8F 08    |               JMP   SETANN1        ; jump over SHORTLOOP
+   89 |  1 GP2IO.s     89 | Code        | 11 |         |    2 | 00/088D : A2 0A       | SHORTLOOP     LDX   #$0A           ; if carry/bit = 0, load X with 10 (short loop)
+   90 |  1 GP2IO.s     90 | Code        | 11 |         |    3 | 00/088F : 8D 5B C0    | SETANN1       STA   {$C05B}        ; set annunciator 1 HIGH
+   91 |  1 GP2IO.s     91 | Code        | 11 |         |    1 | 00/0892 : CA          | COUNTDOWN     DEX                  ; decrement, countdown to setting ANN1 low (COUNTDOWN)
+   92 |  1 GP2IO.s     92 | Code        | 11 |         |    2 | 00/0893 : D0 FD       |               BNE   COUNTDOWN      ; if X > 0, keep counting (goto COUNTDOWN)
+   93 |  1 GP2IO.s     93 | Code        | 11 |         |    3 | 00/0895 : 8D 5A C0    |               STA   {$C05A}        ; if done, set ANN1 LOW, countdown to getting next bit
+   94 |  1 GP2IO.s     94 | Code        | 11 |         |    2 | 00/0898 : A2 05       |               LDX   #$05           ; reset counter for short "reset" transition. This lets the GP2IO stage the bit before the next interrupt
+   95 |  1 GP2IO.s     95 | Code        | 11 |         |    1 | 00/089A : CA          | COUNTDOWN2    DEX                  ; count down again (COUNTDOWN2)
+   96 |  1 GP2IO.s     96 | Code        | 11 |         |    2 | 00/089B : D0 FD       |               BNE   COUNTDOWN2     ; if X > 0, keep counting (goto COUNTDOWN2)
+   97 |  1 GP2IO.s     97 | Code        | 11 |         |    1 | 00/089D : 88          |               DEY                  ; decrement y, countdown bits sent
+   98 |  1 GP2IO.s     98 | Code        | 11 |         |    2 | 00/089E : D0 E4       |               BNE   SENDBIT        ; if y > 0, next bit (SENDBIT)
+   99 |  1 GP2IO.s     99 | Code        | 11 |         |    3 | 00/08A0 : 8D 58 C0    | RTSOFF        STA   {$C058}        ; annunciator 0 low, sending RTS OFF
+  100 |  1 GP2IO.s    100 | Code        | 11 |         |    1 | 00/08A3 : 60          |               RTS                  ; return
+  101 |  1 GP2IO.s    101 | Empty       | 11 |         |    0 | 00/08A4               |                                    
+  102 |  1 GP2IO.s    102 | Code        | 11 |         |    2 | 00/08A4 : A2 09       | READBYTE      LDX   #$09           ; reading 8 bits requires 9 transitions.
+  103 |  1 GP2IO.s    103 | Code        | 11 |         |    2 | 00/08A6 : A9 00       |               LDA   #$00           ; clear the accumulator
+  104 |  1 GP2IO.s    104 | Code        | 11 |         |    2 | 00/08A8 : 85 EF       |               STA   {$EF}          ; $EF is staging for received byte, set 0
+  105 |  1 GP2IO.s    105 | Code        | 11 |         |    2 | 00/08AA : 85 EE       |               STA   {$EE}          ; $EE is staging for each bit, set 0
+  106 |  1 GP2IO.s    106 | Code        | 11 |         |    3 | 00/08AC : 8D 5D C0    | CTSON         STA   {$C05D}        ; set ANN2 HIGH, indicate to AVR "Clear to Send"
+  107 |  1 GP2IO.s    107 | Code        | 11 |         |    2 | 00/08AF : A0 FF       | LOOPSTART     LDY   #$FF           ;	start wait loop
+  108 |  1 GP2IO.s    108 | Code        | 11 |         |    1 | 00/08B1 : C8          | LOOPCOUNT     INY                  ; Increment Y - rolls over to 0 on first run (loopcount)
+  109 |  1 GP2IO.s    109 | Code        | 11 |         |    3 | 00/08B2 : AD 62 C0    |               LDA   {$C062}        ;	check PB1 status hi/low
+  110 |  1 GP2IO.s    110 | Code        | 11 |         |    2 | 00/08B5 : 29 80       |               AND   #$80           ;	clear 0-6 bits (just need bit 7, all others float)
+  111 |  1 GP2IO.s    111 | Code        | 11 |         |    2 | 00/08B7 : C5 EE       |               CMP   {$EE}          ; compare Accumulator 7 bit with $EE, previous PB2 value
+  112 |  1 GP2IO.s    112 | Code        | 11 |         |    2 | 00/08B9 : D0 02       |               BNE   BITCHANGE      ; if PB2 has changed state, store in $EE (bitchange)
+  113 |  1 GP2IO.s    113 | Code        | 11 |         |    2 | 00/08BB : F0 F4       |               BEQ   LOOPCOUNT      ; bit hasn't changed yet, return to (loopcount)
+  114 |  1 GP2IO.s    114 | Code        | 11 |         |    2 | 00/08BD : 85 EE       | BITCHANGE     STA   {$EE}          ; (bitchange)
+  115 |  1 GP2IO.s    115 | Code        | 11 |         |    2 | 00/08BF : C0 44       |               CPY   #$44           ; if the loop count is more than 68, bit is one. Bit is set in Carry
+  116 |  1 GP2IO.s    116 | Code        | 11 |         |    2 | 00/08C1 : 26 EF       |               ROL   {$EF}          ; rotate the new bit into $EF, our result byte.
+  117 |  1 GP2IO.s    117 | Code        | 11 |         |    1 | 00/08C3 : CA          |               DEX                  ; decrement X, our bit count
+  118 |  1 GP2IO.s    118 | Code        | 11 |         |    2 | 00/08C4 : D0 E9       |               BNE   LOOPSTART      ; if bit count is not yet full, loop back to (loopcount)
+  119 |  1 GP2IO.s    119 | Code        | 11 |         |    3 | 00/08C6 : 8D 5C C0    | CTSOFF        STA   {$C05C}        ; if bit count is full, set ANN2 LOW, CTS off
+  120 |  1 GP2IO.s    120 | Code        | 11 |         |    2 | 00/08C9 : A5 EF       |               LDA   {$EF}          ; puts received byte into Accumulator
+  121 |  1 GP2IO.s    121 | Code        | 11 |         |    1 | 00/08CB : 60          |               RTS                  ; return with byte in Accumulator
+  122 |  1 GP2IO.s    122 | Empty       | 11 |         |    0 | 00/08CC               |                                    
+------+-------------------+-------------+----+---------+------+-----------------------+-------------------------------------------------------------------
